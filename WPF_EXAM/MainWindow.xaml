@@ -1,0 +1,575 @@
+﻿<Window x:Class="WPF_EXAM.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WPF_EXAM"
+        mc:Ignorable="d"
+        Title="Player" Height="600" Width="1000" MinWidth="680" MinHeight="240">
+
+    <Window.Resources>
+
+        <!--#region Appearance -->
+       
+        <!-- Default -->
+        <Thickness x:Key="Default_Margin">8,0</Thickness>
+        
+        <SolidColorBrush x:Key="Default_Primary_Color" Color="#FF74A9FF" />
+        <SolidColorBrush x:Key="Default_Secondary_Color" Color="#FF002A6F" />
+        <SolidColorBrush x:Key="Default_Tertiary_Color" Color="#FF0061FF" />
+
+        <Style x:Key="Default_Image_Size" TargetType="{x:Type Image}">
+            <Setter Property="Width" Value="24" />
+            <Setter Property="Height" Value="24" />
+        </Style>
+        
+        <Style x:Key="Default_Button_Style" TargetType="{x:Type Button}">
+            <Setter Property="Width" Value="32" />
+            <Setter Property="Height" Value="32" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="ContentTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <Image Style="{StaticResource Default_Image_Size}" Source="{Binding Tag, RelativeSource={RelativeSource AncestorType=Button}}" Stretch="Uniform" />
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        
+        <Style x:Key="Default_SelectedState_Border_Style" TargetType="{x:Type Border}">
+            <Setter Property="BorderBrush" Value="{StaticResource Default_Tertiary_Color}" />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="BorderBrush" Value="{StaticResource Default_Primary_Color}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="Default_SelectedState_TextBlock_Style" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{StaticResource Default_Tertiary_Color}" />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Foreground" Value="{StaticResource Default_Primary_Color}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="Default_DataGridRow_Style" TargetType="{x:Type DataGridRow}">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#4000B0FF"/>
+                    <Setter Property="BorderBrush" Value="{StaticResource Default_Primary_Color}" />
+                </Trigger>
+
+                <MultiTrigger>
+                    <MultiTrigger.Conditions>
+                        <Condition Property="IsSelected" Value="True" />
+                        <Condition Property="IsKeyboardFocusWithin" Value="True" />
+                    </MultiTrigger.Conditions>
+                    <Setter Property="Background" Value="#4000B0FF" />
+                </MultiTrigger>
+                <MultiTrigger>
+                    <MultiTrigger.Conditions>
+                        <Condition Property="IsSelected" Value="True" />
+                        <Condition Property="IsKeyboardFocusWithin" Value="False" />
+                    </MultiTrigger.Conditions>
+                    <Setter Property="Background" Value="#2000B0FF" />
+                </MultiTrigger>
+            </Style.Triggers>
+        </Style>
+        
+        <Style x:Key="Default_IndexCircleStyle" TargetType="{x:Type Border}">
+            <Setter Property="BorderBrush" Value="{StaticResource Default_Tertiary_Color}" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}}" 
+                     Value="True">
+                    <Setter Property="BorderBrush" Value="{StaticResource Default_Primary_Color}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}}" Value="True">
+                    <Setter Property="BorderBrush" Value="{StaticResource Default_Primary_Color}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        
+        <Style TargetType="{x:Type DataGridCell}">
+            <Setter Property="BorderBrush" Value="{StaticResource Default_Tertiary_Color}" />
+            <Setter Property="BorderThickness" Value="0.5" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="Transparent" />
+                    <Setter Property="BorderBrush" Value="{StaticResource Default_Primary_Color}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        
+        <Style x:Key="Default_DataGrid_Style" TargetType="{x:Type DataGrid}">
+            <Setter Property="Grid.Row" Value="1" />
+            <Setter Property="Background" Value="{StaticResource Default_Secondary_Color}" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Margin" Value="{StaticResource Default_Margin}" />
+            <Setter Property="HeadersVisibility" Value="None" />
+            <Setter Property="IsReadOnly" Value="True" />
+            <Setter Property="SelectionUnit" Value="FullRow" />
+            <Setter Property="RowStyle" Value="{StaticResource Default_DataGridRow_Style}" />
+            <Setter Property="AutoGenerateColumns" Value="False" />
+            <Setter Property="CanUserResizeColumns" Value="False" />
+            <Setter Property="SelectionMode" Value="Single" />
+            <Setter Property="Focusable" Value="True" />
+            <Setter Property="KeyboardNavigation.TabNavigation" Value="Once" />
+            <Setter Property="HorizontalScrollBarVisibility" Value="Disabled" />
+        </Style>
+
+
+        <Style x:Key="Default_PlayButton_Style" BasedOn="{StaticResource Default_Button_Style}" TargetType="{x:Type Button}">
+            <Setter Property="ContentTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <Image Style="{StaticResource Default_Image_Size}" Source="{Binding Tag, RelativeSource={RelativeSource AncestorType=Button}}" Stretch="Uniform" />
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Visibility" Value="Hidden"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}}" Value="True">
+                    <Setter Property="Visibility" Value="Visible" />
+                </DataTrigger>
+
+                <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}}" Value="True">
+                    <Setter Property="Visibility" Value="Visible" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        
+        <Style x:Key="Default_DataGridText_Style" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="{StaticResource Default_Tertiary_Color}" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+            <Setter Property="TextWrapping" Value="NoWrap "/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}}" 
+                     Value="True">
+                    <Setter Property="Foreground" Value="{StaticResource Default_Primary_Color}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}}" Value="True">
+                    <Setter Property="Foreground" Value="{StaticResource Default_Primary_Color}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+
+        <!-- Header -->
+        <Style x:Key="Header_Border_Style" TargetType="{x:Type Border}">
+            <Setter Property="Grid.Row" Value="0" />
+            <Setter Property="CornerRadius" Value="12,12,0,0" />
+            <Setter Property="Background">
+                <Setter.Value>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="#FF002A6F" Offset="0" />
+                        <GradientStop Color="#FF74A9FF" Offset="1" />
+                    </LinearGradientBrush>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Margin" Value="8,8,8,0" />
+        </Style>
+        
+        <Style x:Key="Header_Label_Style" TargetType="{x:Type Label}">
+            <Setter Property="FontSize" Value="28" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="FontFamily" Value="Ebrima" />
+            <Setter Property="Foreground" Value="{StaticResource Default_Primary_Color}" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Margin" Value="16,0,0,0" />
+        </Style>
+        
+        <Style x:Key="Header_Button_Style" TargetType="{x:Type Button}">
+            <Setter Property="Width" Value="40" />
+            <Setter Property="Height" Value="40" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <Grid>
+                            <Ellipse Fill="{StaticResource Default_Secondary_Color}" />
+                            <Image Style="{StaticResource Default_Image_Size}" Source="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}}" Stretch="Uniform" />
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+                
+        <!--#endregion-->
+
+        <!--#region Program -->
+
+        <local:TimeSpanToTimeStringConverter x:Key="timeSpanToTimeStringConverter" />
+        <local:TimeStringToTimeIntConverter x:Key="timeStringToTimeIntConverter" />
+        <local:ItemTypeToTemplateVisibilityConverter x:Key="itemTypeToTemplateVisibilityConverter" />
+        <local:ItemTypeToTemplateBackgroundConverter x:Key="itemTypeToTemplateBackgroundConverter" />
+
+        <!--#endregion-->
+
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="72" />
+        </Grid.RowDefinitions>
+
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#FF74A9FF" Offset="0" />
+                <GradientStop Color="#FF002A6F" Offset="0.5" />
+                <GradientStop Color="#FF0061FF" Offset="1" />
+            </LinearGradientBrush>
+        </Grid.Background>
+        
+        <MediaElement Grid.Row="1" x:Name="mediaElement" LoadedBehavior="Manual" />
+
+        <!-- Header + Main -->
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="2.5*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="72" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!-- First column (Liked) -->
+            <Border Grid.Column="0" Style="{StaticResource Header_Border_Style}" Margin="8,8,0,0" >
+                <Label Style="{StaticResource Header_Label_Style}" Content="Liked" />
+            </Border>
+
+            <DataGrid Grid.Column="0" Style="{StaticResource Default_DataGrid_Style}" ItemsSource="{Binding ItemsData.LikedItems}" Margin="8,0,0,0" SelectedIndex="{Binding ActualSelectedIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SelectedItem="{Binding ActualSelectedItem, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn Width="56">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border Style="{StaticResource Default_IndexCircleStyle}" BorderThickness="1" CornerRadius="50" Width="32" Height="32" Margin="8">
+                                    <TextBlock Text="{Binding Index}" Style="{StaticResource Default_DataGridText_Style}" />
+                                </Border>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    
+                    <DataGridTemplateColumn Width="56">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Image Source="{Binding Picture}" Width="40" Height="40" Stretch="Uniform" Margin="8" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    
+                    <DataGridTemplateColumn Width="*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Vertical" Margin="8">
+                                    <TextBlock Text="{Binding Title}" Style="{StaticResource Default_DataGridText_Style}" ToolTip="Title" HorizontalAlignment="Left" ToolTipService.ShowDuration="3000" FontWeight="Bold" />
+                                    <TextBlock Text="{Binding Artist}" Style="{StaticResource Default_DataGridText_Style}" ToolTip="Artist" HorizontalAlignment="Left" ToolTipService.ShowDuration="3000" FontSize="14" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Width="48">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Style="{StaticResource Default_Button_Style}" ToolTip="Remove from liked" ToolTipService.ShowDuration="3000" Tag="Images/liked.png" HorizontalAlignment="Center" Margin="8"
+                                        Command="{Binding DataContext.UnlikeCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                                        CommandParameter="{Binding UniqueId}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+
+
+            <!-- Second column (Songs) -->
+            <Border Grid.Column="1" Style="{StaticResource Header_Border_Style}" >
+                <DockPanel HorizontalAlignment="Stretch">
+                    <Label Style="{StaticResource Header_Label_Style}" Content="Songs" />
+
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="40,0,0,0">
+                        <Button Style="{StaticResource Header_Button_Style}" ToolTip="Open" ToolTipService.ShowDuration="3000" Tag="Images/open.png" Margin="0,0,8,0"
+                                Command="{Binding OpenCommand}" />
+                        <Button Style="{StaticResource Header_Button_Style}" ToolTip="Add" ToolTipService.ShowDuration="3000" Tag="Images/add.png"
+                                Command="{Binding AddCommand}" />
+                    </StackPanel>
+
+                    <Border CornerRadius="15" Background="{StaticResource Default_Secondary_Color}" Padding="4" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="40,0,16,0">
+                        <DockPanel>
+                            <Image Style="{StaticResource Default_Image_Size}" Source="Images/search.png" Stretch="Uniform" />
+                            <TextBox Width="200" VerticalAlignment="Center" BorderThickness="0" FontSize="14" FontWeight="Bold" Padding="12,2,0,0" Background="{StaticResource Default_Secondary_Color}" FontFamily="Bahnschrift Condensed">
+                                <TextBox.Style>
+                                    <Style TargetType="{x:Type TextBox}">
+                                        <Setter Property="Foreground" Value="{StaticResource Default_Tertiary_Color}" />
+                                        <Setter Property="Text" Value="Search" />
+                                        <Style.Triggers>
+                                            <Trigger Property="IsFocused" Value="True">
+                                                <Setter Property="Text" Value="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+                                                <Setter Property="Foreground" Value="{StaticResource Default_Primary_Color}" />
+                                            </Trigger>
+                                            <Trigger Property="IsFocused" Value="False">
+                                                <Setter Property="Text" Value="Search" />
+                                                <Setter Property="Foreground" Value="{StaticResource Default_Tertiary_Color}" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBox.Style>
+                            </TextBox>
+                        </DockPanel>
+                    </Border>
+                </DockPanel>
+            </Border>
+
+            <DataGrid Grid.Column="1" Style="{StaticResource Default_DataGrid_Style}" ItemsSource="{Binding ItemsData.Items}" SelectedIndex="{Binding ActualSelectedIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SelectedItem="{Binding ActualSelectedItem, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn Width="48">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Margin="8" ToolTipService.ShowDuration="3000">
+                                    <Button.Style>
+                                        <Style BasedOn="{StaticResource Default_PlayButton_Style}" TargetType="{x:Type Button}">
+                                            <Setter Property="Tag" Value="Images/play.png" />
+                                            <Setter Property="ToolTip" Value="Play" />
+                                            <Setter Property="Command" Value="{Binding DataContext.PlayCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
+                                            <Setter Property="CommandParameter" Value="{Binding DataContext.ActualSelectedItem, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsPlaying}" Value="True">
+                                                    <Setter Property="Tag" Value="Images/stop.png"/>
+                                                    <Setter Property="ToolTip" Value="Stop"/>
+                                                    <Setter Property="Command" Value="{Binding DataContext.StopCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Width="56">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border Style="{StaticResource Default_IndexCircleStyle}" BorderThickness="1" CornerRadius="50" Width="32" Height="32" Margin="8">
+                                    <TextBlock Text="{Binding Index}" Style="{StaticResource Default_DataGridText_Style}" />
+                                </Border>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Width="56">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Image Source="{Binding Picture}" Width="40" Height="40" Stretch="Uniform" Margin="8" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Width="*">
+                        <DataGridTemplateColumn.CellTemplate >
+                            <DataTemplate>
+                                <StackPanel Orientation="Vertical" HorizontalAlignment="Center" Margin="8">
+                                    <TextBlock Text="{Binding Title}" ToolTip="Title" ToolTipService.ShowDuration="3000" Style="{StaticResource Default_DataGridText_Style}" FontWeight="Bold" />
+                                    <TextBlock Text="{Binding Artist}" ToolTip="Artist" ToolTipService.ShowDuration="3000" Style="{StaticResource Default_DataGridText_Style}" FontSize="12" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Width="*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Album}" Style="{StaticResource Default_DataGridText_Style}" ToolTip="Album" ToolTipService.ShowDuration="3000" Margin="8" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Width="*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Genre}" Style="{StaticResource Default_DataGridText_Style}" ToolTip="Genre" ToolTipService.ShowDuration="3000" Margin="8" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Width="*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Year}" Style="{StaticResource Default_DataGridText_Style}" ToolTip="Year" ToolTipService.ShowDuration="3000" Margin="8" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Width="48">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Margin="8">
+                                    <Button.Style>
+                                        <Style BasedOn="{StaticResource Default_Button_Style}" TargetType="{x:Type Button}">
+                                            <Setter Property="Tag" Value="Images/notliked.png"/>
+                                            <Setter Property="ToolTip" Value="Add to liked"/>
+                                            <Setter Property="Command" Value="{Binding DataContext.LikeCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"/>
+                                            <Setter Property="CommandParameter" Value="{Binding UniqueId}"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsLiked}" Value="True">
+                                                    <Setter Property="Tag" Value="Images/liked.png"/>
+                                                    <Setter Property="ToolTip" Value="Remove from liked"/>
+                                                    <Setter Property="Command" Value="{Binding DataContext.UnlikeCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"/>
+                                                    <Setter Property="CommandParameter" Value="{Binding UniqueId}"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Width="*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Duration}" Style="{StaticResource Default_DataGridText_Style}" ToolTip="Duration" ToolTipService.ShowDuration="3000" Margin="8" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Width="48">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Style="{StaticResource Default_Button_Style}" ToolTip="Delete" ToolTipService.ShowDuration="3000" Tag="Images/delete.png" Margin="8"
+                                        Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                                        CommandParameter="{Binding UniqueId}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <!--
+                     Visibility="{Binding FileType, Converter={StaticResource itemTypeToTemplateVisibilityConverter}, ConverterParameter={x:Static local:FileType.Audio}}" Background="{Binding FileType, Converter={StaticResource itemTypeToTemplateVisibilityConverter}, ConverterParameter={x:Static local:FileType.Audio}}"
+                    
+                    <DataGridTemplateColumn Width="*" сюди Visibility не ставиться та пише що тут датаконтекст null>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="UNKNOWN ITEM" Visibility="{Binding FileType, Converter={StaticResource itemTypeToTemplateVisibilityConverter}, ConverterParameter={x:Static local:FileType.Unknown}}" Background="{Binding FileType, Converter={StaticResource itemTypeToTemplateVisibilityConverter}, ConverterParameter={x:Static local:FileType.Unknown}}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Width="*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Path}" Visibility="{Binding FileType, Converter={StaticResource itemTypeToTemplateVisibilityConverter}, ConverterParameter={x:Static local:FileType.Unknown}}" Background="{Binding FileType, Converter={StaticResource itemTypeToTemplateVisibilityConverter}, ConverterParameter={x:Static local:FileType.Unknown}}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>-->
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+
+        <!-- Footer -->
+        <Grid Grid.Row="1" Margin="{StaticResource Default_Margin}">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                <Image Margin="0,0,8,0" Source="{Binding PlayingItem.Picture}" Stretch="Uniform" />
+
+                <StackPanel Orientation="Vertical">
+                    <TextBlock Text="{Binding PlayingItem.Title}" ToolTip="Title" ToolTipService.ShowDuration="3000" FontSize="24" FontWeight="Bold" Foreground="{StaticResource Default_Primary_Color}" />
+                    <TextBlock Grid.Row="1" Text="{Binding PlayingItem.Artist}" ToolTip="Artist" ToolTipService.ShowDuration="3000" FontSize="16" Foreground="{StaticResource Default_Primary_Color}" />
+                </StackPanel>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+                <TextBlock Foreground="{StaticResource Default_Primary_Color}" ToolTip="Current moment" ToolTipService.ShowDuration="3000">
+                    <TextBlock.Style>
+                        <Style TargetType="{x:Type TextBlock}">
+                            <Setter Property="Text" Value="{Binding CurrentPosition, Converter={StaticResource timeSpanToTimeStringConverter}}" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding PlayingItem}" Value="{x:Null}">
+                                    <Setter Property="Text" Value="" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+
+                <Border CornerRadius="5" BorderBrush="{StaticResource Default_Primary_Color}" BorderThickness="1" VerticalAlignment="Center" Margin="{StaticResource Default_Margin}">
+                    <ProgressBar Width="200" Height="4" Background="{StaticResource Default_Primary_Color}" BorderBrush="{StaticResource Default_Primary_Color}" Foreground="{StaticResource Default_Secondary_Color}" Minimum="0" Maximum="{Binding PlayingItem.Duration, Converter={StaticResource timeStringToTimeIntConverter}}">
+                        <ProgressBar.Style>
+                            <Style TargetType="{x:Type ProgressBar}">
+                                <Setter Property="Value" Value="{Binding CurrentPosition.TotalSeconds, Mode=OneWay}" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding PlayingItem}" Value="{x:Null}">
+                                        <Setter Property="Value" Value="0" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ProgressBar.Style>
+                    </ProgressBar>
+                </Border>
+                
+                <TextBlock Text="{Binding PlayingItem.Duration}" Foreground="{StaticResource Default_Primary_Color}" ToolTip="Duration" ToolTipService.ShowDuration="3000" />
+            </StackPanel>
+
+            <DockPanel VerticalAlignment="Center" HorizontalAlignment="Right">
+                <Button ToolTipService.ShowDuration="3000" Command="{Binding ShuffleCommand}">
+                    <Button.Style>
+                        <Style BasedOn="{StaticResource Default_Button_Style}" TargetType="{x:Type Button}">
+                            <Setter Property="Tag" Value="Images/shuffle.png" />
+                            <Setter Property="ToolTip" Value="Shuffle: Off" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsShuffled}" Value="True">
+                                    <Setter Property="Tag" Value="Images/shuffleOn.png"/>
+                                    <Setter Property="ToolTip" Value="Shuffle: On"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+                
+                <Button Style="{StaticResource Default_Button_Style}" ToolTip="Previous" ToolTipService.ShowDuration="3000" Tag="Images/prev.png"
+                        Command="{Binding PreviousCommand}"/>
+                
+                <Button ToolTipService.ShowDuration="3000">
+                    <Button.Style>
+                        <Style BasedOn="{StaticResource Default_Button_Style}" TargetType="{x:Type Button}">
+                            <Setter Property="Tag" Value="Images/play.png" />
+                            <Setter Property="ToolTip" Value="Play" />
+                            <Setter Property="Command" Value="{Binding PlayCommand}" />
+                            <Setter Property="CommandParameter" Value="{Binding ActualSelectedItem}" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding PlayingItem.IsPlaying}" Value="True">
+                                    <Setter Property="Tag" Value="Images/stop.png"/>
+                                    <Setter Property="ToolTip" Value="Stop"/>
+                                    <Setter Property="Command" Value="{Binding StopCommand}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+                
+                <Button Style="{StaticResource Default_Button_Style}" ToolTip="Next" ToolTipService.ShowDuration="3000" Tag="Images/next.png"
+                        Command="{Binding NextCommand}"/>
+
+                <Button ToolTipService.ShowDuration="3000" Command="{Binding ReplayCommand}">
+                    <Button.Style>
+                        <Style BasedOn="{StaticResource Default_Button_Style}" TargetType="{x:Type Button}">
+                            <Setter Property="Tag" Value="Images/replay.png" />
+                            <Setter Property="ToolTip" Value="Replay: Off" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsReplay}" Value="True">
+                                    <Setter Property="Tag" Value="Images/replayOn.png"/>
+                                    <Setter Property="ToolTip" Value="Replay: On"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </DockPanel>
+        </Grid>
+    </Grid>
+</Window>
