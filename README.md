@@ -22,6 +22,12 @@ WPF Audio Player — це музичний програвач (аналог Spot
 
 ---
 
+## Скриншоти
+<img width="977" height="587" alt="CopyQ lRuNXt" src="https://github.com/user-attachments/assets/4b1b352c-1d00-489c-9a8b-2e7cd8428f05" />
+<img width="975" height="585" alt="CopyQ CdHkTo" src="https://github.com/user-attachments/assets/5670f383-1a63-4a02-9854-acd2c4577485" />
+
+---
+
 ## Функціонал
 
 - ▶️ Відтворення, пауза, зупинка, перемотка треків
